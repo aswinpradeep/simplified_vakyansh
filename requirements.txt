@@ -1,0 +1,5 @@
+#contents to be added
+denoiser==0.1.4
+torchaudio==0.5.1
+torch==1.5.1
+webrtcvad==2.0.10
