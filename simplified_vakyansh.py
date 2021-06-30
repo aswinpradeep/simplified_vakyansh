@@ -368,25 +368,27 @@ def get_srt1(file_name, language, model_path, dict_path, punctuate, itn):
 
 
 
+def main():
+    
+    #HARDCODINGS
 
+    PUNCTUATE = True
+    ITN = False
+    LANGUAGE = 'hi'
+    AUDIOFORMAT = 'MP3'
 
+    FILE_PATH = "/home/aswin/speech-text-dataset-generation/hindi/1920_202161/audio_chunks/chunk23.wav"
+    MODEL_PATH = "/home/aswin/Downloads/hindi/final_model_ajitesh_test.pt"
+    DICT_PATH = "/home/aswin/Downloads/hindi/dict.ltr.txt"
 
-#HARDCODINGS
+    file_name = 'audio_input_{}.{}'.format(str("get_current_time_in_millis"), "audio_format.lower")
+    audiocontent = read_audio(FILE_PATH,"wav")
 
-PUNCTUATE = True
-ITN = False
-LANGUAGE = 'hi'
-AUDIOFORMAT = 'MP3'
+    audio_path = create_wav_file_using_bytes(file_name, audiocontent)
+    response = get_srt1(audio_path, LANGUAGE, MODEL_PATH, DICT_PATH, PUNCTUATE, ITN)
+    srt=response['srt']
+    print(srt)
+    os.remove(audio_path)
 
-FILE_PATH = "/home/aswin/speech-text-dataset-generation/hindi/1920_202161/audio_chunks/chunk23.wav"
-MODEL_PATH = "/home/aswin/Downloads/hindi/final_model_ajitesh_test.pt"
-DICT_PATH = "/home/aswin/Downloads/hindi/dict.ltr.txt"
-
-file_name = 'audio_input_{}.{}'.format(str("get_current_time_in_millis"), "audio_format.lower")
-audiocontent = read_audio(FILE_PATH,"wav")
-
-audio_path = create_wav_file_using_bytes(file_name, audiocontent)
-response = get_srt1(audio_path, LANGUAGE, MODEL_PATH, DICT_PATH, PUNCTUATE, ITN)
-srt=response['srt']
-print(srt)
-os.remove(audio_path)
+if __name__ == "__main__":
+    main()
