@@ -12,6 +12,7 @@ import torch
 import torch.nn.functional as F
 from fairseq.data import Dictionary
 from inference_lib.w2l_viterbi_decoder import W2lViterbiDecoder
+from fairseq.models.wav2vec import Wav2VecCtc
 # from inverse_text_normalization.run_predict import inverse_normalize_text
 from inference_lib.w2l_kenlm_decoder import W2lKenLMDecoder
 # from fairseq import utils
@@ -20,7 +21,6 @@ from inference_lib.w2l_kenlm_decoder import W2lKenLMDecoder
  
 
 def read_audio(in_file,type):
-    import datetime
     with wave.open(in_file, 'rb') as f:
         return f.readframes(f.getnframes())
 
@@ -340,6 +340,20 @@ def get_srt3(file_name, model, generator, dict_path, audio_threshold=5, language
     result = generate_srt(wav_path=audio_file, language=language, model=model, generator=generator, cuda=torch.cuda.is_available(), dict_path=dict_path)
     return result
 
+def get_args(dict_path, BEAM=128, LM_WEIGHT=2, WORD_SCORE=-1):
+    args = {}
+    args['lexicon'] = dict_path.replace("dict.ltr.txt","lexicon.lst")
+    args['kenlm_model'] = dict_path.replace("dict.ltr.txt","lm.binary")
+    args['beam'] = BEAM
+    args['beam_threshold'] = 25
+    args['lm_weight'] = LM_WEIGHT
+    args['word_score'] = WORD_SCORE
+    args['unk_weight'] = -np.inf
+    args['sil_weight'] = 0
+    args['nbest'] = 1
+    args['criterion'] = 'ctc'
+    args['labels'] = 'ltr'
+    return args
 
 def get_srt2(file_name, language, model_path, dict_path):
     generator = None
@@ -348,7 +362,7 @@ def get_srt2(file_name, language, model_path, dict_path):
 
     if language == 'hi' or language == 'en-IN' or language == 'kn-lm':
         # generator = self.generators[language]
-        generator = W2lKenLMDecoder(Dictionary.load(dict_path))
+        generator = W2lKenLMDecoder(get_args(dict_path), Dictionary.load(dict_path))
 
     # result = get_srt3(file_name=file_name, model=self.models[language], generator=generator, dict_path=self.dict_paths[language], language=language, denoiser_path=denoiser_path)
     result = get_srt3(file_name=file_name, model=model, generator=generator, dict_path=dict_path, language=language)
